@@ -121,6 +121,7 @@ class Runner
 				$running[] = $job = array_shift($this->jobs);
 				$async = $this->threadCount > 1 && (count($running) + count($this->jobs) > 1);
 				$job->setEnvironmentVariable(Environment::THREAD, (string) array_shift($threads));
+				$this->startTest($job->getTest());
 				$job->run($async ? $job::RUN_ASYNC : 0);
 			}
 
@@ -187,6 +188,19 @@ class Runner
 	{
 		foreach ($this->outputHandlers as $handler) {
 			$handler->prepare($test);
+		}
+	}
+
+
+	/**
+	 * Writes to start-aware output handlers
+	 */
+	private function startTest(Test $test): void
+	{
+		foreach ($this->outputHandlers as $handler) {
+			if ($handler instanceof StartAwareOutputHandler) {
+				$handler->start($test);
+			}
 		}
 	}
 
